@@ -1,2 +1,5 @@
 # plexy
-The sexy multiplexer 
+The sexy\* multiplexer 
+
+
+\*Disclaimer: May not be sexy.
