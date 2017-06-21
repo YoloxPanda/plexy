@@ -1,6 +1,9 @@
 package plexy
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type node struct {
 	parent   *node
@@ -9,13 +12,13 @@ type node struct {
 	handler  PlexyHandler
 }
 
-func (n *node) addChild(val string) {
-	child := constructNode(val)
+func (n *node) addChild(val string, handler PlexyHandler) {
+	child := constructNode(val, handler)
 	child.parent = n
 	n.children = append(n.children, child)
 }
 
-func constructNode(s string) *node {
+func constructNode(s string, handler PlexyHandler) *node {
 	split := cleanse(strings.Split(s, "/"))
 
 	n := &node{
@@ -29,16 +32,21 @@ func constructNode(s string) *node {
 	}
 
 	cn := n
-	for _, x := range split {
+	for i, x := range split {
 		cn.val = x
-		childNode := &node{
-			parent:   cn,
-			children: []*node{},
+
+		if i != len(split)-1 {
+			childNode := &node{
+				parent:   cn,
+				children: []*node{},
+			}
+			cn.children = append(cn.children, childNode)
+			cn = childNode
 		}
-		cn.children = append(cn.children, childNode)
-		cn = childNode
 	}
 
+	cn.handler = handler
+	fmt.Println(cn.val)
 	return n
 }
 

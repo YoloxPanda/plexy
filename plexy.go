@@ -37,15 +37,12 @@ type defaultPlexy struct {
 }
 
 func (d *defaultPlexy) Handle(path string, handler PlexyHandler) {
-	n := constructNode(path)
-	n.handler = handler
+	n := constructNode(path, handler)
 	d.ph.addPath(n)
 }
 
 func (d *defaultPlexy) HandleFunc(path string, handler func(w http.ResponseWriter, r *http.Request, params *Params)) {
-	n := constructNode(path)
-	n.handler = funcPlexyHandler{handler}
-	fmt.Println(n.val, n.handler)
+	n := constructNode(path, funcPlexyHandler{handler})
 	d.ph.addPath(n)
 }
 
@@ -65,13 +62,12 @@ func (p *defaultPlexy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	n := p.ph.findNode(r.URL.Path)
 
-	if n == nil {
+	if n == nil || n.handler == nil {
 		http.NotFound(lrw, r)
 		return
 	}
 
-	fmt.Println(n.handler)
-	// n.handler.Handle(lrw, r, &Params{})
+	n.handler.Handle(lrw, r, &Params{})
 
 	log.Printf("%s - %d - %s\n", http.StatusText(lrw.status), lrw.status, r.URL.Path)
 }
