@@ -12,6 +12,11 @@ type node struct {
 	handler  PlexyHandler
 }
 
+func (n *node) isPlaceholder() bool {
+	// A placeholder begins with ':'
+	return strings.HasPrefix(n.val, ":")
+}
+
 func (n *node) addChild(val string, handler PlexyHandler) {
 	child := constructNode(val, handler)
 	child.parent = n
@@ -95,6 +100,39 @@ func (p *pathHandler) findNode(s string) *node {
 	}
 
 	return foundNode
+}
+
+func (p *pathHandler) matchPath(path string) (*node, *Params) {
+	split := cleanse(strings.Split(path, "/"))
+	depth := 0
+	// search for the top paths (all the parents)
+	ca := p.paths
+
+	params := newParams()
+	var foundNode *node
+
+	for i := 0; i < len(split); i++ {
+		for _, x := range ca {
+			// if it equals the path name OR is a placeholder
+			if x.val == split[depth] || x.isPlaceholder() {
+
+				if x.isPlaceholder() {
+					params.params[x.val[1:]] = split[depth]
+				}
+
+				depth++
+				ca = x.children
+				foundNode = x
+			}
+		}
+	}
+
+	if depth != len(split) {
+		fmt.Println("Depth:", depth, "Length:", len(split))
+		return nil, nil
+	}
+
+	return foundNode, params
 }
 
 // func main() {

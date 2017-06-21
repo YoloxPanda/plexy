@@ -10,6 +10,12 @@ type Params struct {
 	params map[string]string
 }
 
+func newParams() *Params {
+	return &Params{
+		params: map[string]string{},
+	}
+}
+
 func (p *Params) Get(key string) string {
 	return p.params[key]
 }
@@ -60,14 +66,14 @@ func (p *defaultPlexy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// we want to log the request code so we will use our own ResponseWriter to capture the status
 	lrw := &loggingResponseWriter{w, http.StatusOK}
 
-	n := p.ph.findNode(r.URL.Path)
+	n, params := p.ph.matchPath(r.URL.Path)
 
 	if n == nil || n.handler == nil {
 		http.NotFound(lrw, r)
 		return
 	}
 
-	n.handler.Handle(lrw, r, &Params{})
+	n.handler.Handle(lrw, r, params)
 
 	log.Printf("%s - %d - %s\n", http.StatusText(lrw.status), lrw.status, r.URL.Path)
 }
