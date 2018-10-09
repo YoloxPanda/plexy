@@ -1,5 +1,2 @@
 # plexy
-The sexy\* multiplexer 
-
-
-\*Disclaimer: May not be sexy.
+The not so sexy, but definitely plexy, multiplexer for Golang.
